@@ -54,6 +54,24 @@ app.get('/hospitalizations/treatments', async (req, res) => {
     }
 });
 
+//Rota da API para buscar o monitoramento de cada animal:
+app.get('/hospitalizations/monitoring', async (req, res) => {
+    try {
+        const result = await pool.query(
+            `SELECT m.monitoring_id, m.mucous_membrane, m.level_consciousness, m.pulse, m.fluid_therapy,
+                m.dehydratation_level, m.rate, m.replacement, m.feeding, m.saturation, m.respiratory_rate, 
+                m.emesis, m.TPC, m.heart_rate, m.stool_check, m.glucose_check, m.urine_check, m.temperature_check, 
+                m.hospitalization_id, m.veterinarian_CPF, m.nurse_CPF, p.pet_id, p.pet_name, p.behavior, p.diseases
+                FROM monitoring m
+                JOIN hospitalizations h ON m.hospitalization_id = h.hospitalization_id
+                JOIN pets p ON h.pet_id = p.pet_id`);
+        res.json(result.rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error when consulting animals monitoring.');
+    }
+});
+
 //POST
 //Rota da API para cadastrar um novo tutor responsável por um animal:
 app.post('/pet-owners', async (req, res) => {
@@ -78,7 +96,7 @@ app.post('/pets', async (req, res) => {
         [pet_name, microchip_code, behavior, species, gender, age, breed, weight, physical_characteristics,
             allergies, diseases, owners_cpf]
     );
-    res.status(201).json(result[0]);
+    res.status(201).json(result.rows[0]);
 });
 
 //Rota da API para cadastrar um novo animal na internação:
@@ -93,7 +111,7 @@ app.post('/pets/hospitalizations', async (req, res) => {
         [cage_number, reason, entry_date, discharge_date, discharge_time, requested_exams, results_exams,
             death, time_death, date_death, hospitalization_observations, pet_id, consultation_id, veterinarian_CPF]
     );
-    res.status(201).json(result[0]);
+    res.status(201).json(result.rows[0]);
 });
 
 //Rota da API para cadastrar um tratamento para um animal que está internado:
@@ -108,7 +126,7 @@ app.post('/hospitalizations/treatments', async (req, res) => {
         [medication_name, medication_period, medication_dosage, medication_interval, medication_check, administration_route,
             treatment_observations, hospitalization_id, veterinarian_CPF, nurse_CPF]
     );
-    res.status(201).json(result[0]);
+    res.status(201).json(result.rows[0]);
 });
 
 //Rota da API para cadastrar um monitoramento para um animal que está internado:
@@ -127,7 +145,7 @@ app.post('/hospitalizations/monitoring', async (req, res) => {
             saturation, respiratory_rate, emesis, TPC, heart_rate, stool_check, glucose_check, urine_check, temperature_check,
             hospitalization_id, veterinarian_CPF, nurse_CPF]
     );
-    res.status(201).json(result[0]);
+    res.status(201).json(result.rows[0]);
 });
 
 //PUT
