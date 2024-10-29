@@ -1,12 +1,15 @@
+
 require('dotenv').config()
 
 const express = require('express');
+const cors = require('cors');
 const { pool } = require('./database/dbConnection');
 
 const app = express();
 const port = 3000;
 
 app.use(express.json());
+app.use(cors());
 
 //GET
 //Rota da API para buscar todos os animais (internados ou não) da clínica:
@@ -149,16 +152,69 @@ app.post('/hospitalizations/monitoring', async (req, res) => {
 });
 
 //PUT
-//Rota da API para editar os dados de internação de um animal da clínica:
-app.put('', (req, res) => {
+//Rota da API para editar os dados de um tutor que é responsável por um animal:
+app.put('/pet-owners/:owners_cpf', async (req, res) => {
+    try {
+    const { owners_cpf } = req.params;
+    const { owners_name, owners_rg, owners_contact, owners_adress } = req.body;
+
+    const result = await pool.query(
+        `UPDATE pet_owners SET owners_name = $1, owners_rg = $2, owners_contact = $3, owners_adress = $4
+            WHERE owners_cpf = $5
+            RETURNING *`,
+        [owners_name, owners_rg, owners_contact, owners_adress, owners_cpf]       
+    );
+
+    if(result.rows.length === 0) {
+        res.status(404).json({err: 'Owner not find.'})
+    };
+
+    res.json(result.rows[0]);
+    } 
+    catch (err) {
+        console.error(err);
+        res.status(500).json({err: 'Error updating tutor data.'});
+    }
+});
+
+//Rota da API para editar os dados de um animal:
+app.put('/pets/:id', async (req, res) => {
 
 });
 
+//Rota da API para editar os dados de internação de um animal da clínica:
+app.put('/hospitalizations/hospitalization_id', (req, res) => {
+
+});
+
+//Rota da API para editar os dados de tratamento de um animal da clínica:
+app.put('/hospitalizations/treatment_id', async (req, res) => {
+
+});
+
+//Rota da API para editar os dados de monitoramento de um animal da clínica:
+app.put('/hospitalizations/monitoring_id', async (req, res) => {
+
+});
 
 //DELETE
-//Rota da API para deletar um animal que está internado na clínica:
-app.delete('', (req, res) => {
+//Rota da API para deletar um tutor (após deletar o tutor os dados do pet também serão deletados de todas as tabelas):
+app.delete('/pet-owners/:owners_cpf', async (req, res) => {
+    try {
+        const { owners_cpf } = req.params;
 
+        const checkOwner = await pool.query(`SELECT * FROM pet_owners WHERE owners_cpf = $1`, [owners_cpf]);
+
+        if(checkOwner.rows.length === 0) {
+            return res.status(404).json({err: 'Pet owner not find.'})
+        };
+
+        await pool.query(`DELETE FROM pet_owners WHERE owners_cpf = $1`, [owners_cpf]);
+        res.status(204).send();
+    } catch(err) {
+        console.error(err);
+        res.status(500).send(`Unexpected error: ${err.message}`);
+    }
 });
 
 
