@@ -69,12 +69,12 @@ app.get('/hospitalizations/monitoring', async (req, res) => {
     try {
         const result = await pool.query(
             `SELECT m.monitoring_id, m.mucous_membrane, m.level_consciousness, m.pulse, m.fluid_therapy,
-                m.dehydratation_level, m.rate, m.replacement, m.feeding, m.saturation,
-                m.respiratory_rate, m.emesis, m.TPC, m.heart_rate, m.stool_check, m.glucose_check, m.urine_check, m.temperature_check, m.hospitalization_id, m.veterinarian_CPF, m.nurse_CPF, p.behavior, p.diseases
+                m.dehydratation_level, m.rate, m.replacement, m.feeding, m.saturation, m.respiratory_rate, 
+                m.emesis, m.TPC, m.heart_rate, m.stool_check, m.glucose_check, m.urine_check, m.temperature_check, 
+                m.hospitalization_id, m.veterinarian_CPF, m.nurse_CPF, p.pet_id, p.pet_name, p.behavior, p.diseases
                 FROM monitoring m
                 JOIN hospitalizations h ON m.hospitalization_id = h.hospitalization_id
-                JOIN pets p ON h.pet_id = p.pet_id`
-            );
+                JOIN pets p ON h.pet_id = p.pet_id`);
         res.json(result.rows);
     } catch (err) {
         console.error(err);
