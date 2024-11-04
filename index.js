@@ -12,6 +12,26 @@ app.use(express.json());
 app.use(cors());
 
 //GET
+//Rota da API para buscar um tutor e os animais que estão cadastrados no id dele:
+app.get('/pet_owners/:owners_cpf', async (req, res) => {
+    const { owners_CPF } = req.params;
+    try {
+        const result = await pool.query(
+            `SELECT po.*, p.pet_id, p.pet_name, p.species, p.breed FROM pet_owners po
+            JOIN pets p ON po.owners_CPF = p.owners_CPF
+            WHERE po.owners_CPF = $1`, 
+            [owners_CPF]
+        );
+        if(result.rows.length === 0){
+            return res.status(404).json({message: 'Pet owner not found.'})
+        }
+        res.status(200).json(result.rows[0]);
+    } catch (err) {
+        console.error('Error searching for pet owner:', err);
+        res.status(500).json({message: 'Error searching for pet owner.'});
+    }
+});
+
 //Rota da API para buscar todos os animais (internados ou não) da clínica:
 app.get('/pets', async (req, res) => {
     try {
@@ -20,6 +40,25 @@ app.get('/pets', async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).send('Error when consulting registered animals.')
+    }
+});
+
+//Rota da API para buscar um animal específico:
+app.get('/pets/:pet_id', async (req, res) => {
+    const { pet_id } = req.params;
+    try {
+        const result = await pool.query(
+            `SELECT p.*, po.owners_CPF, po.owners_name FROM pets p 
+            JOIN pet_owners po ON p.owners_CPF = po.owners_CPF WHERE p.pet_id = $1`, 
+            [pet_id]
+        );
+        if(result.rows.length === 0) {
+            return res.status(404).json({message: 'Pet not found.'})
+        }
+        res.status(200).json(result.rows[0]);
+    } catch(err) {
+        console.error('Error searching for pet:' , err);
+        res.status(500).json({message: 'Error searching for pet.'});
     }
 });
 
@@ -77,7 +116,7 @@ app.get('/hospitalizations/monitoring', async (req, res) => {
 
 //POST
 //Rota da API para cadastrar um novo tutor responsável por um animal:
-app.post('/pet-owners', async (req, res) => {
+app.post('/pet_owners', async (req, res) => {
     const { owners_cpf, owners_name, owners_rg, owners_contact, owners_adress } = req.body;
 
     const result = await pool.query(
@@ -153,7 +192,7 @@ app.post('/hospitalizations/monitoring', async (req, res) => {
 
 //PUT
 //Rota da API para editar os dados de um tutor que é responsável por um animal:
-app.put('/pet-owners/:owners_cpf', async (req, res) => {
+app.put('/pet_owners/:owners_cpf', async (req, res) => {
     try {
     const { owners_cpf } = req.params;
     const { owners_name, owners_rg, owners_contact, owners_adress } = req.body;
@@ -178,28 +217,28 @@ app.put('/pet-owners/:owners_cpf', async (req, res) => {
 });
 
 //Rota da API para editar os dados de um animal:
-app.put('/pets/:id', async (req, res) => {
+app.put('/pets/:pet_id', async (req, res) => {
 
 });
 
 //Rota da API para editar os dados de internação de um animal da clínica:
-app.put('/hospitalizations/hospitalization_id', (req, res) => {
+app.put('/pets/hospitalizations/:hospitalization_id', (req, res) => {
 
 });
 
 //Rota da API para editar os dados de tratamento de um animal da clínica:
-app.put('/hospitalizations/treatment_id', async (req, res) => {
+app.put('/hospitalizations/treatments/:treatment_id', async (req, res) => {
 
 });
 
 //Rota da API para editar os dados de monitoramento de um animal da clínica:
-app.put('/hospitalizations/monitoring_id', async (req, res) => {
+app.put('/hospitalizations/monitoring/:monitoring_id', async (req, res) => {
 
 });
 
 //DELETE
 //Rota da API para deletar um tutor (após deletar o tutor os dados do pet também serão deletados de todas as tabelas):
-app.delete('/pet-owners/:owners_cpf', async (req, res) => {
+app.delete('/pet_owners/:owners_cpf', async (req, res) => {
     try {
         const { owners_cpf } = req.params;
 
@@ -217,6 +256,7 @@ app.delete('/pet-owners/:owners_cpf', async (req, res) => {
     }
 });
 
+//Rota da API para deletar uma internação de um animal (com o tratamento e o monitoramento também deletados):
 
 //Conexão com o servidor e com o banco de dados:
 app.listen(port, () => {
