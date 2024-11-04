@@ -1,3 +1,4 @@
+
 require('dotenv').config()
 
 //Conexão com banco de dados na nuvem e SGBD PostgreSQL:

@@ -2,12 +2,15 @@
 require('dotenv').config()
 
 const express = require('express');
+const cors = require('cors');
 const { pool } = require('./database/dbConnection');
 
 const app = express();
 const port = 3000;
 
 app.use(express.json());
+app.use(cors());
+
 
 //GET
 //Rota da API para buscar todos os animais (internados ou não) da clínica:
@@ -104,7 +107,7 @@ app.post('/pets', async (req, res) => {
         [pet_name, microchip_code, behavior, species, gender, age, breed, weight, physical_characteristics,
             allergies, diseases, owners_cpf]
     );
-    res.status(201).json(result[0]);
+    res.status(201).json(result.rows[0]);
 });
 
 //Rota da API para cadastrar um novo animal na internação:
@@ -119,7 +122,7 @@ app.post('/pets/hospitalizations', async (req, res) => {
         [cage_number, reason, entry_date, discharge_date, discharge_time, requested_exams, results_exams,
             death, time_death, date_death, hospitalization_observations, pet_id, consultation_id, veterinarian_CPF]
     );
-    res.status(201).json(result[0]);
+    res.status(201).json(result.rows[0]);
 });
 
 //Rota da API para cadastrar um tratamento para um animal que está internado:
@@ -134,7 +137,7 @@ app.post('/hospitalizations/treatments', async (req, res) => {
         [medication_name, medication_period, medication_dosage, medication_interval, medication_check, administration_route,
             treatment_observations, hospitalization_id, veterinarian_CPF, nurse_CPF]
     );
-    res.status(201).json(result[0]);
+    res.status(201).json(result.rows[0]);
 });
 
 //Rota da API para cadastrar um monitoramento para um animal que está internado:
@@ -152,7 +155,7 @@ app.post('/hospitalizations/monitoring', async (req, res) => {
             saturation, respiratory_rate, emesis, TPC, heart_rate, stool_check, glucose_check, urine_check, temperature_check,
             hospitalization_id, veterinarian_CPF, nurse_CPF]
     );
-    res.status(201).json(result[0]);
+    res.status(201).json(result.rows[0]);
 });
 
 //PUT
