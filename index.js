@@ -1,7 +1,11 @@
 
+
 require('dotenv').config()
 
 const express = require('express');
+const cors = require('cors');
+const { pool } = require('./database/dbConnection');
+
 const cors = require('cors');
 const { pool } = require('./database/dbConnection');
 
@@ -22,6 +26,23 @@ app.get('/pets', async (req, res) => {
         res.status(500).send('Error when consulting registered animals.')
     }
 });
+app.use(cors());
+
+
+//GET
+//Rota da API para buscar todos os animais (internados ou não) da clínica:
+app.get('/pets', async (req, res) => {
+    try {
+        const result = await pool.query(
+            `SELECT * 
+            FROM pets`
+        );
+        res.json(result.rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error when consulting registered animals.')
+    }
+});
 
 //Rota da API para buscar somente os animais que estão internados na clínica:
 app.get('/pets/hospitalizations', async (req, res) => {
@@ -33,6 +54,23 @@ app.get('/pets/hospitalizations', async (req, res) => {
             JOIN pets p ON h.pet_id = p.pet_id 
             JOIN pet_owners o ON p.owners_CPF = o.owners_CPF
             WHERE h.discharge_date IS null AND h.death = FALSE`);
+        res.json(result.rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error when consulting hospitalized animals.')
+    }
+});
+app.get('/pets/hospitalizations', async (req, res) => {
+    try {
+        const result = await pool.query(
+            `SELECT h.hospitalization_id, h.cage_number, h.reason, h.entry_date, h.requested_exams,
+             h.results_exams, h.hospitalization_observations, h.pet_id, p.pet_name, o.owners_name, o.owners_contact, 
+             h.consultation_id, h.veterinarian_CPF
+            FROM hospitalizations h 
+            JOIN pets p ON h.pet_id = p.pet_id 
+            JOIN pet_owners o ON p.owners_CPF = o.owners_CPF
+            WHERE h.discharge_date IS null AND h.death = FALSE`
+        );
         res.json(result.rows);
     } catch (err) {
         console.error(err);
@@ -74,6 +112,8 @@ app.get('/hospitalizations/monitoring', async (req, res) => {
         res.status(500).send('Error when consulting animals monitoring.');
     }
 });
+
+
 
 //POST
 //Rota da API para cadastrar um novo tutor responsável por um animal:
