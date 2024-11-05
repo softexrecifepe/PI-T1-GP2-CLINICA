@@ -11,12 +11,80 @@ const port = 3000;
 app.use(express.json());
 app.use(cors());
 
-
 //GET
+//Rota da API para buscar todos os animais (internados ou não) da clínica:
+app.get('/pets', async (req, res) => {
+    try {
+        const result = await pool.query(
+            `SELECT * 
+            FROM pets`
+        );
+        res.json(result.rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({message: 'Error when consulting registered animals.'})
+    }
+});
+
+//Rota da API para buscar somente os animais que estão internados na clínica:
+app.get('/pets/hospitalizations', async (req, res) => {
+    try {
+        const result = await pool.query(
+            `SELECT h.hospitalization_id, h.cage_number, h.reason, h.entry_date, h.requested_exams,
+             h.results_exams, h.hospitalization_observations, h.pet_id, p.pet_name, o.owners_name, o.owners_contact, 
+             h.consultation_id, h.veterinarian_CPF
+            FROM hospitalizations h 
+            JOIN pets p ON h.pet_id = p.pet_id 
+            JOIN pet_owners o ON p.owners_CPF = o.owners_CPF
+            WHERE h.discharge_date IS null AND h.death = FALSE`
+        );
+        res.json(result.rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({message: 'Error when consulting hospitalized animals.'})
+    }
+});
+
+//Rota da API para buscar quais os tratamentos(medicações) que cada animal está tomando:
+app.get('/hospitalizations/treatments', async (req, res) => {
+    try {
+        const result = await pool.query(
+            `SELECT t.treatment_id, t.medication_name, t.medication_period, t.medication_dosage, t.medication_interval,
+                t.medication_check, t.administration_route, t.treatment_observations, t.hospitalization_id, t.veterinarian_CPF,
+                t.nurse_CPF, p.pet_id, p.pet_name, p.weight, p.species, p.breed, p.behavior, p.allergies
+                FROM treatments t
+                JOIN hospitalizations h ON t.hospitalization_id = h.hospitalization_id
+                JOIN pets p ON h.pet_id = p.pet_id`
+            );
+        res.json(result.rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({message: 'Error when consulting animals treatments.'})
+    }
+});
+
+//Rota da API para buscar o monitoramento de cada animal:
+app.get('/hospitalizations/monitoring', async (req, res) => {
+    try {
+        const result = await pool.query(
+            `SELECT m.monitoring_id, m.mucous_membrane, m.level_consciousness, m.pulse, m.fluid_therapy,
+                m.dehydratation_level, m.rate, m.replacement, m.feeding, m.saturation, m.respiratory_rate, 
+                m.emesis, m.TPC, m.heart_rate, m.stool_check, m.glucose_check, m.urine_check, m.temperature_check, 
+                m.hospitalization_id, m.veterinarian_CPF, m.nurse_CPF, p.pet_id, p.pet_name, p.behavior, p.diseases
+                FROM monitoring m
+                JOIN hospitalizations h ON m.hospitalization_id = h.hospitalization_id
+                JOIN pets p ON h.pet_id = p.pet_id`);
+        res.json(result.rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({message: 'Error when consulting animals monitoring.'});
+    }
+});
+
 //Rota da API para buscar um tutor e os animais que estão cadastrados no id dele:
 app.get('/pet_owners/:owners_cpf', async (req, res) => {
-    const { owners_cpf } = req.params;
     try {
+        const { owners_cpf } = req.params;
         const result = await pool.query(
             `SELECT po.*, p.pet_id, p.pet_name, p.species, p.breed FROM pet_owners po
             JOIN pets p ON po.owners_cpf = p.owners_cpf
@@ -47,24 +115,10 @@ app.get('/pet_owners/:owners_cpf', async (req, res) => {
     }
 });
 
-//Rota da API para buscar todos os animais (internados ou não) da clínica:
-app.get('/pets', async (req, res) => {
-    try {
-        const result = await pool.query(
-            `SELECT * 
-            FROM pets`
-        );
-        res.json(result.rows);
-    } catch (err) {
-        console.error(err);
-        res.status(500).send('Error when consulting registered animals.')
-    }
-});
-
 //Rota da API para buscar um animal específico:
 app.get('/pets/:pet_id', async (req, res) => {
-    const { pet_id } = req.params;
-    try {
+        try {
+        const { pet_id } = req.params;
         const result = await pool.query(
             `SELECT p.*, po.owners_CPF, po.owners_name FROM pets p 
             JOIN pet_owners po ON p.owners_CPF = po.owners_CPF WHERE p.pet_id = $1`, 
@@ -80,64 +134,10 @@ app.get('/pets/:pet_id', async (req, res) => {
     }
 });
 
-//Rota da API para buscar somente os animais que estão internados na clínica:
-app.get('/pets/hospitalizations', async (req, res) => {
-    try {
-        const result = await pool.query(
-            `SELECT h.hospitalization_id, h.cage_number, h.reason, h.entry_date, h.requested_exams,
-             h.results_exams, h.hospitalization_observations, h.pet_id, p.pet_name, o.owners_name, o.owners_contact, 
-             h.consultation_id, h.veterinarian_CPF
-            FROM hospitalizations h 
-            JOIN pets p ON h.pet_id = p.pet_id 
-            JOIN pet_owners o ON p.owners_CPF = o.owners_CPF
-            WHERE h.discharge_date IS null AND h.death = FALSE`
-        );
-        res.json(result.rows);
-    } catch (err) {
-        console.error(err);
-        res.status(500).send('Error when consulting hospitalized animals.')
-    }
-});
-
-//Rota da API para buscar quais os tratamentos(medicações) que cada animal está tomando:
-app.get('/hospitalizations/treatments', async (req, res) => {
-    try {
-        const result = await pool.query(
-            `SELECT t.treatment_id, t.medication_name, t.medication_period, t.medication_dosage, t.medication_interval,
-                t.medication_check, t.administration_route, t.treatment_observations, t.hospitalization_id, t.veterinarian_CPF,
-                t.nurse_CPF, p.pet_id, p.pet_name, p.weight, p.species, p.breed, p.behavior, p.allergies
-                FROM treatments t
-                JOIN hospitalizations h ON t.hospitalization_id = h.hospitalization_id
-                JOIN pets p ON h.pet_id = p.pet_id`
-            );
-        res.json(result.rows);
-    } catch (err) {
-        console.error(err);
-        res.status(500).send('Error when consulting animals treatments.')
-    }
-});
-
-//Rota da API para buscar o monitoramento de cada animal:
-app.get('/hospitalizations/monitoring', async (req, res) => {
-    try {
-        const result = await pool.query(
-            `SELECT m.monitoring_id, m.mucous_membrane, m.level_consciousness, m.pulse, m.fluid_therapy,
-                m.dehydratation_level, m.rate, m.replacement, m.feeding, m.saturation, m.respiratory_rate, 
-                m.emesis, m.TPC, m.heart_rate, m.stool_check, m.glucose_check, m.urine_check, m.temperature_check, 
-                m.hospitalization_id, m.veterinarian_CPF, m.nurse_CPF, p.pet_id, p.pet_name, p.behavior, p.diseases
-                FROM monitoring m
-                JOIN hospitalizations h ON m.hospitalization_id = h.hospitalization_id
-                JOIN pets p ON h.pet_id = p.pet_id`);
-        res.json(result.rows);
-    } catch (err) {
-        console.error(err);
-        res.status(500).send('Error when consulting animals monitoring.');
-    }
-});
-
 //POST
 //Rota da API para cadastrar um novo tutor responsável por um animal:
 app.post('/pet_owners', async (req, res) => {
+    try {
     const { owners_cpf, owners_name, owners_rg, owners_contact, owners_adress } = req.body;
     const result = await pool.query(
         `INSERT INTO pet_owners (owners_cpf, owners_name, owners_rg, owners_contact, owners_adress) 
@@ -146,10 +146,15 @@ app.post('/pet_owners', async (req, res) => {
         [owners_cpf, owners_name, owners_rg, owners_contact, owners_adress]
     );
     res.status(201).json(result.rows[0]);
+    } catch(err) {
+        console.error(err);
+        res.status(500).json({message: 'Error creating pet owner.'})
+    }
 });
 
 //Rota da API para cadastrar um novo animal na clínica:
 app.post('/pets', async (req, res) => {
+    try {
     const { pet_name, microchip_code, behavior, species, gender, age, breed, weight, physical_characteristics,
         allergies, diseases, owners_cpf } = req.body;
     const result = await pool.query(
@@ -161,10 +166,15 @@ app.post('/pets', async (req, res) => {
             allergies, diseases, owners_cpf]
     );
     res.status(201).json(result.rows[0]);
+    } catch(err) {
+        console.error(err);
+        res.status(500).json({message: 'Error creating pet.'})
+    }
 });
 
 //Rota da API para cadastrar um novo animal na internação:
 app.post('/pets/hospitalizations', async (req, res) => {
+    try {
     const { cage_number, reason, entry_date, discharge_date, discharge_time, requested_exams, results_exams,
         death, time_death, date_death, hospitalization_observations, pet_id, consultation_id, veterinarian_CPF } = req.body;
     const result = await pool.query(
@@ -176,10 +186,15 @@ app.post('/pets/hospitalizations', async (req, res) => {
             death, time_death, date_death, hospitalization_observations, pet_id, consultation_id, veterinarian_CPF]
     );
     res.status(201).json(result.rows[0]);
+    } catch(err) {
+        console.error(err);
+        res.status(500).json({message: 'Error creating hospitalization.'})
+    }
 });
 
 //Rota da API para cadastrar um tratamento para um animal que está internado:
 app.post('/hospitalizations/treatments', async (req, res) => {
+    try {
     const { medication_name, medication_period, medication_dosage, medication_interval, medication_check, administration_route,
         treatment_observations, hospitalization_id, veterinarian_CPF, nurse_CPF } = req.body;
     const result = await pool.query(
@@ -191,10 +206,15 @@ app.post('/hospitalizations/treatments', async (req, res) => {
             treatment_observations, hospitalization_id, veterinarian_CPF, nurse_CPF]
     );
     res.status(201).json(result.rows[0]);
+    } catch(err) {
+        console.error(err);
+        res.status(500).json({message: 'Error creating treatment.'})
+    }
 });
 
 //Rota da API para cadastrar um monitoramento para um animal que está internado:
 app.post('/hospitalizations/monitoring', async (req, res) => {
+    try {
     const { mucous_membrane, level_consciousness, pulse, fluid_therapy, dehydratation_level, rate, replacement, feeding,
         saturation, respiratory_rate, emesis, TPC, heart_rate, stool_check, glucose_check, urine_check, temperature_check,
         hospitalization_id, veterinarian_CPF, nurse_CPF } = req.body;
@@ -209,6 +229,10 @@ app.post('/hospitalizations/monitoring', async (req, res) => {
             hospitalization_id, veterinarian_CPF, nurse_CPF]
     );
     res.status(201).json(result.rows[0]);
+    } catch(err) {
+        console.error(err);
+        res.status(500).json({message: 'Error creating monitoring.'})
+    } 
 });
 
 //PUT
@@ -225,13 +249,13 @@ app.put('/pet_owners/:owners_cpf', async (req, res) => {
             [owners_name, owners_rg, owners_contact, owners_adress, owners_cpf]
         );
         if (result.rows.length === 0) {
-            res.status(404).json({ err: 'Owner not found.' })
+            res.status(404).json({ message: 'Pet owner not found with the specified CPF.' })
         };
-        res.json(result.rows[0]);
+        res.status(200).json(result.rows[0]);
     }
     catch (err) {
         console.error(err);
-        res.status(500).json({ err: 'Error updating tutor data.' });
+        res.status(500).json({ message: 'Unexpected error occurred while updating pet owner information.' });
     }
 });
 
@@ -251,12 +275,12 @@ app.put('/pets/:pet_id', async (req, res) => {
                 allergies, diseases, pet_id]
         );
         if (result.rows.length === 0) {
-            return res.status(404).send('Pet not found.');
+            return res.status(404).json({message: 'Pet not found with the specified ID.'});
         }
-        res.json(result.rows[0]);
+        res.status(200).json(result.rows[0]);
     } catch (err) {
         console.error(err);
-        res.status(500).send('Error updating pet information.');
+        res.status(500).json({message: 'Unexpected error occurred while updating pet information.'});
     }
 });
 
@@ -278,12 +302,12 @@ app.put('/hospitalizations/:hospitalization_id', async (req, res) => {
                 veterinarian_CPF, hospitalization_id]
         );
         if (result.rows.length === 0) {
-            return res.status(404).send('Hospitalization not found.');
+            return res.status(404).json({message: 'Hospitalization not found with specified ID.'});
         }
-        res.json(result.rows[0]);
+        res.status(200).json(result.rows[0]);
     } catch (err) {
         console.error(err);
-        res.status(500).send('Error updating hospitalization information.');
+        res.status(500).json({message: 'Unexpected error occurred while updating hospitalization information.'});
     }
 });
 
@@ -304,12 +328,12 @@ app.put('/hospitalizations/treatments/:treatment_id', async (req, res) => {
                 administration_route, treatment_observations, hospitalization_id, veterinarian_CPF, nurse_CPF, treatment_id]
         );
         if (result.rows.length === 0) {
-            return res.status(404).send('Treatment not found.');
+            return res.status(404).json({ message: 'Treatment not found with specified ID.'});
         }
-        res.json(result.rows[0]);
+        res.status(200).json(result.rows[0]);
     } catch (err) {
         console.error(err);
-        res.status(500).send('Error updating treatment information.');
+        res.status(500).json({message: 'Unexpected error occurred while updating treatment information.'});
     }
 });
 
@@ -335,12 +359,12 @@ app.put('/hospitalizations/monitoring/:monitoring_id', async (req, res) => {
                 veterinarian_CPF, nurse_CPF, monitoring_id]
         );
         if (result.rows.length === 0) {
-            return res.status(404).send('Monitoring record not found.');
+            return res.status(404).json({message: 'Monitoring record not found with specified ID.'});
         }
-        res.json(result.rows[0]);
+        res.status(200).json(result.rows[0]);
     } catch (err) {
         console.error(err);
-        res.status(500).send('Error updating monitoring information.');
+        res.status(500).json({message: 'Unexpected error occurred while updating monitoring information.'});
     }
 });
 
@@ -348,26 +372,21 @@ app.put('/hospitalizations/monitoring/:monitoring_id', async (req, res) => {
 //Rota da API para deletar um tutor (após deletar o tutor os dados do pet também serão deletados de todas as tabelas):
 app.delete('/pet_owners/:owners_cpf', async (req, res) => {
     try {
-        const { owners_cpf } = req.params;
-        const checkOwner = await pool.query(
-            `SELECT * 
-            FROM pet_owners 
-            WHERE owners_cpf = $1`, 
-            [owners_cpf]
-        );
-        if (checkOwner.rows.length === 0) {
-            return res.status(404).json({ err: 'Pet owner not found.' })
-        };
-        await pool.query(
+        const { owners_cpf } = req.params;     
+        const result = await pool.query(
             `DELETE 
             FROM pet_owners 
-            WHERE owners_cpf = $1`, 
+            WHERE owners_cpf = $1
+            RETURNING *`, 
             [owners_cpf]
         );
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: 'Pet owner not found.' })
+        };
         res.status(204).send();
     } catch (err) {
         console.error(err);
-        res.status(500).send(`Unexpected error: ${err.message}`);
+        res.status(500).json({message: 'Unexpected error occurred while deleting pet owner.'});
     }
 });
 
@@ -375,27 +394,42 @@ app.delete('/pet_owners/:owners_cpf', async (req, res) => {
 app.delete('/pets/:pet_id', async (req, res) => {
     try {
         const { pet_id } = req.params;
-        const checkPet = await pool.query(
-            `SELECT * 
-            FROM pets 
-            WHERE pet_id = $1`, 
-            [pet_id]);
-        if (checkPet.rows.length === 0) {
-            return res.status(404).json({ err: 'Pet not found.' });
-        }
-        await pool.query(
+        const result = await pool.query(
             `DELETE 
             FROM pets 
-            WHERE pet_id = $1`, 
-            [pet_id]);
+            WHERE pet_id = $1
+            RETURNING *`, 
+            [pet_id]
+        );
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: 'Pet not found.' });
+        }
         res.status(204).send();
     } catch (err) {
         console.error(err);
-        res.status(500).send(`Unexpected error: ${err.message}`);
+        res.status(500).json({message: 'Unexpected error occurred while deleting pet.'});
     }
 });
 
 //Rota da API para deletar uma internação de um animal (com o tratamento e o monitoramento também deletados):
+app.delete('/hospitalizations/:hospitalization_id', async (req, res) => {
+    try {
+        const { hospitalization_id } = req.params;
+        const result = await pool.query(
+            `DELETE FROM hospitalizations
+            WHERE hospitalizations_id = $1
+            RETURNING *`,
+            [hospitalization_id]
+        );
+        if(result.rows.length === 0) {
+            return res.status(404).json({message: 'Hospitalization not found.'})
+        }
+        res.status(204).send();
+    } catch(err) {
+        console.error(err);
+        res.status(500).json({message: 'Unexpected error occurred while deleting hospitalization.'});
+    }
+});
 
 //Conexão com o servidor e com o banco de dados:
 app.listen(port, () => {
