@@ -1,5 +1,5 @@
 
-const { pool } = require('./database/dbConnection');
+const { pool } = require('../database/dbConnection');
 
 //GET
 //Rota da API para buscar somente os animais que estão internados na clínica:
@@ -95,5 +95,5 @@ module.exports = {
     getAllHospitalizedPets,
     createNewHospitalization,
     updateHospitalizationById,
-    deleteHospitalizationById
+    deleteHospitalizationById,
 };
