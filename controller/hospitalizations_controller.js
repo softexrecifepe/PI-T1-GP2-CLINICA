@@ -11,7 +11,8 @@ async function getAllHospitalizedPets (req, res) {
              h.consultation_id, h.veterinarian_CPF
             FROM hospitalizations h 
             JOIN pets p ON h.pet_id = p.pet_id 
-            JOIN pet_owners o ON p.owners_CPF = o.owners_CPF`
+            JOIN pet_owners o ON p.owners_CPF = o.owners_CPF
+            WHERE h.discharge_date IS null AND h.death = FALSE`
         );
         res.json(result.rows);
     } catch (err) {
