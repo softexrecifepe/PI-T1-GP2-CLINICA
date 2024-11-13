@@ -18,14 +18,8 @@ const TreatmentsController = require('./controller/treatments_controller');
 const MonitoringController = require('./controller/monitoring_controller');
 
 //GET
-//Rota da API para buscar um tutor e os animais que estão cadastrados no id dele:
-app.get('/pet_owners/:owners_cpf', PetOwnersController.getOwnerById);
-
 //Rota da API para buscar todos os animais (internados ou não) da clínica:
 app.get('/pets', PetsController.getAllPets);
-
-//Rota da API para buscar um animal específico:
-app.get('/pets/:pet_id', PetsController.getPetById);
 
 //Rota da API para buscar somente os animais que estão internados na clínica:
 app.get('/pets/hospitalizations', HospitalizationsController.getAllHospitalizedPets);
@@ -35,6 +29,12 @@ app.get('/hospitalizations/treatments', TreatmentsController.getAllTreatments);
 
 //Rota da API para buscar o monitoramento de cada animal:
 app.get('/hospitalizations/monitoring', MonitoringController.getAllMonitoring);
+
+//Rota da API para buscar um tutor e os animais que estão cadastrados no id dele:
+app.get('/pet_owners/:owners_cpf', PetOwnersController.getOwnerById);
+
+//Rota da API para buscar um animal específico:
+app.get('/pets/:pet_id', PetsController.getPetById);
 
 //POST
 //Rota da API para cadastrar um novo tutor responsável por um animal:
