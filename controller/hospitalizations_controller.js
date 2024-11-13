@@ -6,13 +6,7 @@ const { pool } = require('../database/dbConnection');
 async function getAllHospitalizedPets (req, res) {
     try {
         const result = await pool.query(
-            `SELECT h.hospitalization_id, h.cage_number, h.reason, h.entry_date, h.requested_exams,
-             h.results_exams, h.hospitalization_observations, h.pet_id, p.pet_name, o.owners_name, o.owners_contact, 
-             h.consultation_id, h.veterinarian_CPF
-            FROM hospitalizations h 
-            JOIN pets p ON h.pet_id = p.pet_id 
-            JOIN pet_owners o ON p.owners_CPF = o.owners_CPF
-            WHERE h.discharge_date IS null AND h.death = FALSE`
+            `select * from hospitalizations;`
         );
         res.json(result.rows);
     } catch (err) {
