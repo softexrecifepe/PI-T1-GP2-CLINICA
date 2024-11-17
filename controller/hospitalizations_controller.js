@@ -77,7 +77,7 @@ async function deleteHospitalizationById (req, res) {
         const { hospitalization_id } = req.params;
         const result = await pool.query(
             `DELETE FROM hospitalizations
-            WHERE hospitalizations_id = $1
+            WHERE hospitalization_id = $1
             RETURNING *`,
             [hospitalization_id]
         );
