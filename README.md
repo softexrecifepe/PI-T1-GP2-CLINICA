@@ -8,10 +8,10 @@ Este é um projeto de Back End para a *Clínica Veterinária Mascot's*, que visa
 ## Tecnologias Utilizadas
 - <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/javascript/javascript-original.svg" alt="JavaScript" width="30" height="30"/> **JavaScript** (Linguagem utilizada no desenvolvimento do projeto)
 - <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/nodejs/nodejs-original.svg" alt="Node.js" width="30" height="30"/> **Node.js** (Ambiente de execução JavaScript)
+- <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/express/express-original-wordmark.svg" alt="Express.js" width="30" height="30"/> **Express.js** (Framework para construção da API)
 - <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/postgresql/postgresql-original.svg" alt="PostgreSQL" width="30" height="30"/> **PostgreSQL** (Banco de dados relacional)
-- **Express.js** (Framework para construção da API)
-- **Postman** (Para documentação e testes da API)
-
+- <img src="https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/dotenv.svg" alt="dotenv" width="30" height="30"/> **dotenv** (Gerenciamento de variáveis de ambiente)
+- <img src="https://uxwing.com/wp-content/themes/uxwing/download/brands-and-social-media/postman-icon.svg" alt="Postman" width="30" height="30"/> **Postman** (Ferramenta para documentação e testes da API)
 
 ## Funcionalidades
 - Cadastro de **animais** e seus dados.
