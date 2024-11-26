@@ -6,10 +6,12 @@
 Este é um projeto de Back End para a *Clínica Veterinária Mascot's*, que visa gerenciar informações sobre animais, médicos veterinários, atendimentos e agendamentos. A aplicação é construída com JavaScript e utiliza o PostgreSQL como banco de dados.
 
 ## Tecnologias Utilizadas
-- **JavaScript** (Node.js)
-- **PostgreSQL**
+- <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/javascript/javascript-original.svg" alt="JavaScript" width="30" height="30"/> **JavaScript** (Linguagem utilizada no desenvolvimento do projeto)
+- <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/nodejs/nodejs-original.svg" alt="Node.js" width="30" height="30"/> **Node.js** (Ambiente de execução JavaScript)
+- <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/postgresql/postgresql-original.svg" alt="PostgreSQL" width="30" height="30"/> **PostgreSQL** (Banco de dados relacional)
 - **Express.js** (Framework para construção da API)
 - **Postman** (Para documentação e testes da API)
+
 
 ## Funcionalidades
 - Cadastro de **animais** e seus dados.
