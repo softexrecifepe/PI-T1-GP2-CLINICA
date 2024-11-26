@@ -25,6 +25,15 @@ Este é um projeto de Back End para a *Clínica Veterinária Mascot's*, que visa
 ## Endpoints da API
 A API está documentada e pode ser consultada no Postman. Você pode visualizar todos os endpoints disponíveis para interação com o sistema acessando a documentação [aqui](https://documenter.getpostman.com/view/39818047/2sAYBUDs5s).
 
+## Desenvolvedores:
+- ### Leonardo Rafael
+  - Github: [/LeonardoRDA1604](https://github.com/LeonardoRDA1604)
+  - LinkedIn: [/leonardorafael1604](https://www.linkedin.com/in/leonardorafael1604/)
+
+- ### Stephanie G. Pinheiro
+  - GitHub: [/stephaniegpinheiro](https://github.com/stephaniegpinheiro)
+  - LinkedIn: [/stephaniegpinheiro](https://www.linkedin.com/in/stephaniegpinheiro/)
+
 ## Como Rodar o Projeto
 
 ### 1. Clonar o Repositório
